@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '../../../../../lib/auth';
-import { db } from '../../../../../lib/db';
+import { getSession } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
-    const updatedUser = await db.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: session.id },
       data: { plan },
       select: { id: true, email: true, name: true, plan: true },

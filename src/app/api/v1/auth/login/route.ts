@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../../../lib/db';
+import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import { encrypt } from '../../../../../lib/auth';
+import { encrypt } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing credentials' }, { status: 400 });
     }
 
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
     });
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 // 1 day
+      maxAge: 60 * 60 * 24
     });
 
     return NextResponse.json({ success: true, user: { id: user.id, email: user.email, name: user.name, plan: user.plan } });

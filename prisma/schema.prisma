@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Village {
+  id          String   @id @default(cuid())
+  name        String
+  district    String
+  subDistrict String?
+  state       String
+  pincode     String?
+  createdAt   DateTime @default(now())
+
+  @@index([name])
+  @@index([district])
+  @@index([state])
+}
+
+model PincodeMapping {
+  id          String   @id @default(cuid())
+  officeName  String
+  pincode     String
+  district    String
+  state       String
+
+  @@index([officeName])
+  @@index([district])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("USER")
+  plan      String   @default("FREE")
+  apiKeys   ApiKey[]
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  usage     Int      @default(0)
+  lastUsed  DateTime?
+}

@@ -32,3 +32,6 @@ yarn-error.log*
 # large data files
 data.csv
 /scripts/*.csv
+prisma/dev.db
+*.csv
+*.xlsx

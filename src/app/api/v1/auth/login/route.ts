@@ -26,11 +26,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Create session
     const session = await encrypt({ id: user.id, email: user.email, name: user.name, role: user.role, plan: user.plan });
     
-    // Set cookie
-    cookies().set('session', session, {
+    const cookieStore = await cookies();
+    cookieStore.set('session', session, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

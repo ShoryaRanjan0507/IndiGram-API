@@ -12,7 +12,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -21,24 +20,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        phone,
-        password: hashedPassword,
-      },
+      data: { email, name, phone, password: hashedPassword },
     });
 
-    // Create session
     const session = await encrypt({ id: user.id, email: user.email, name: user.name, role: user.role, plan: user.plan });
     
-    // Set cookie
-    cookies().set('session', session, {
+    const cookieStore = await cookies();
+    cookieStore.set('session', session, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

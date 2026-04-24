@@ -32,7 +32,8 @@ export default function LandingPage() {
         <span style={{ fontWeight: '800', letterSpacing: '-0.02em', fontSize: '1.2rem' }}>IndiGram</span>
         <a href="#features" className="nav-link">Features</a>
         <a href="#plans" className="nav-link">Plans</a>
-        <a href="/search" className="btn-buy">Get Started</a>
+        <a href="/login" className="nav-link" style={{ fontWeight: 600 }}>Sign In</a>
+        <a href="/signup" className="btn-buy">Sign Up</a>
       </nav>
 
       {/* Hero Section */}

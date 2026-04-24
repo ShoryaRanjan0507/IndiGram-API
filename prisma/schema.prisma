@@ -35,6 +35,9 @@ model PincodeMapping {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
+  password  String?
+  name      String?
+  phone     String?
   role      String   @default("USER")
   plan      String   @default("FREE")
   apiKeys   ApiKey[]

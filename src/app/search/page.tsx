@@ -61,22 +61,24 @@ export default function SearchPage() {
           <a href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
             &larr; Back to Home
           </a>
-          <button 
-            onClick={() => setIsDev(!isDev)}
-            style={{
-              padding: '0.4rem 1rem',
-              borderRadius: '20px',
-              border: `1px solid ${isDev ? '#000' : '#ddd'}`,
-              background: isDev ? '#000' : 'transparent',
-              color: isDev ? '#fff' : 'var(--text-muted)',
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            {isDev ? '🚀 Developer Mode ON' : 'Enable Dev Mode'}
-          </button>
+          {process.env.NODE_ENV === 'development' && (
+            <button 
+              onClick={() => setIsDev(!isDev)}
+              style={{
+                padding: '0.4rem 1rem',
+                borderRadius: '20px',
+                border: `1px solid ${isDev ? '#000' : '#ddd'}`,
+                background: isDev ? '#000' : 'transparent',
+                color: isDev ? '#fff' : 'var(--text-muted)',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {isDev ? '🚀 Developer Mode ON' : 'Enable Dev Mode'}
+            </button>
+          )}
         </div>
         
         <h1 className="title" style={{ fontSize: '3rem', textAlign: 'left', marginBottom: '2rem' }}>

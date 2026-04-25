@@ -90,65 +90,85 @@ export default function DashboardPage() {
               <div style={{ fontWeight: 700 }}>{user.name}</div>
               <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>{user.email}</div>
             </div>
-            <div 
-              onClick={() => setShowMenu(!showMenu)}
+            <button 
+              onClick={() => {
+                console.log('Avatar clicked, current showMenu:', showMenu);
+                setShowMenu(!showMenu);
+              }}
               style={{ 
-                width: '40px', 
-                height: '40px', 
+                width: '44px', 
+                height: '44px', 
                 borderRadius: '50%', 
                 background: 'linear-gradient(45deg, #0070f3, #ff0080)', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center', 
+                color: '#fff',
+                fontSize: '1.1rem',
                 fontWeight: 800,
                 cursor: 'pointer',
-                transition: 'transform 0.2s ease',
-                transform: showMenu ? 'scale(1.1)' : 'scale(1)'
+                border: 'none',
+                boxShadow: '0 4px 15px rgba(0,112,243,0.3)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: showMenu ? 'scale(1.1) rotate(5deg)' : 'scale(1)',
+                zIndex: 1001,
+                position: 'relative'
               }}>
-              {user.name?.[0]}
-            </div>
+              {user.name?.[0] || 'U'}
+            </button>
 
             {/* Dropdown Menu */}
             {showMenu && (
               <div style={{
                 position: 'absolute',
-                top: '120%',
+                top: '100%',
                 right: 0,
-                background: '#111',
+                marginTop: '1rem',
+                background: '#1a1a1a',
                 border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px',
-                padding: '0.5rem',
-                minWidth: '160px',
-                zIndex: 100,
-                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                borderRadius: '16px',
+                padding: '0.6rem',
+                minWidth: '200px',
+                zIndex: 1002,
+                boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(20px)',
+                animation: 'revealUp 0.2s ease-out'
               }}>
                 <a href="/" style={{
-                  display: 'block',
-                  padding: '0.75rem 1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.8rem 1rem',
                   color: '#fff',
                   textDecoration: 'none',
                   fontSize: '0.9rem',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }} className="menu-item">
-                  🏠 Home Page
+                  borderRadius: '10px',
+                  transition: 'background 0.2s',
+                  background: 'transparent'
+                }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                   onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
+                  <span style={{ fontSize: '1.1rem' }}>🏠</span> Home Page
                 </a>
+                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0.4rem 0' }}></div>
                 <button 
                   onClick={handleLogout}
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
                     width: '100%',
                     textAlign: 'left',
-                    padding: '0.75rem 1rem',
-                    color: '#ff0080',
-                    background: 'none',
+                    padding: '0.8rem 1rem',
+                    color: '#ff4d4d',
+                    background: 'transparent',
                     border: 'none',
                     fontSize: '0.9rem',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     cursor: 'pointer',
                     transition: 'background 0.2s'
-                  }} className="menu-item">
-                  🚪 Log Out
+                  }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,77,77,0.1)'}
+                     onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
+                  <span style={{ fontSize: '1.1rem' }}>🚪</span> Log Out
                 </button>
               </div>
             )}

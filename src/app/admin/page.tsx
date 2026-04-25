@@ -25,12 +25,15 @@ interface Stats {
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
 
   const fetchData = () => {
+    // Fetch all users for admin
     fetch('/api/v1/admin/users')
       .then(res => {
         if (!res.ok) throw new Error('Unauthorized');
@@ -39,17 +42,29 @@ export default function AdminPage() {
       .then(data => {
         setUsers(data.users || []);
         setStats(data.stats || null);
-        setLoading(false);
       })
       .catch(err => {
         setError(err.message);
-        setLoading(false);
       });
+
+    // Fetch current admin user info
+    fetch('/api/v1/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) setCurrentUser(data.user);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   };
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleLogout = async () => {
+    await fetch('/api/v1/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  };
 
   const handleUpdatePlan = async (userId: string, newPlan: string) => {
     setUpdating(userId);
@@ -104,9 +119,80 @@ export default function AdminPage() {
             <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>Platform Admin</h1>
             <p style={{ opacity: 0.5, marginTop: '0.5rem' }}>IndiGram Global Management & Analytics</p>
           </div>
-          <a href="/dashboard" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 600, padding: '0.6rem 1.2rem', borderRadius: '12px', border: '1px solid rgba(0,112,243,0.3)' }}>
-            &larr; Dashboard
-          </a>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', position: 'relative' }}>
+            <a href="/dashboard" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 600, padding: '0.6rem 1.2rem', borderRadius: '12px', border: '1px solid rgba(0,112,243,0.3)' }}>
+              &larr; Dashboard
+            </a>
+            
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontWeight: 700 }}>{currentUser?.name}</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>{currentUser?.email}</div>
+            </div>
+
+            <div 
+              onClick={() => setShowMenu(!showMenu)}
+              style={{ 
+                width: '40px', 
+                height: '40px', 
+                borderRadius: '50%', 
+                background: 'linear-gradient(45deg, #0070f3, #ff0080)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontWeight: 800,
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease',
+                transform: showMenu ? 'scale(1.1)' : 'scale(1)'
+              }}>
+              {currentUser?.name?.[0]}
+            </div>
+
+            {/* Dropdown Menu */}
+            {showMenu && (
+              <div style={{
+                position: 'absolute',
+                top: '120%',
+                right: 0,
+                background: '#111',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                padding: '0.5rem',
+                minWidth: '160px',
+                zIndex: 100,
+                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+              }}>
+                <a href="/" style={{
+                  display: 'block',
+                  padding: '0.75rem 1rem',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  🏠 Home Page
+                </a>
+                <button 
+                  onClick={handleLogout}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '0.75rem 1rem',
+                    color: '#ff0080',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '0.9rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                  }}>
+                  🚪 Log Out
+                </button>
+              </div>
+            )}
+          </div>
         </header>
 
         {/* Stats Grid */}

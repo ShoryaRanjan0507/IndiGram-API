@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     fetch('/api/v1/auth/me')
@@ -38,6 +39,11 @@ export default function DashboardPage() {
         window.location.href = '/login';
       });
   }, []);
+
+  const handleLogout = async () => {
+    await fetch('/api/v1/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -76,7 +82,7 @@ export default function DashboardPage() {
             </a>
             <p style={{ opacity: 0.5, fontSize: '0.9rem', marginTop: '0.4rem' }}>Developer Console</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', position: 'relative' }}>
              {user.role === 'ADMIN' && (
                <a href="/admin" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>Admin Panel</a>
              )}
@@ -84,9 +90,68 @@ export default function DashboardPage() {
               <div style={{ fontWeight: 700 }}>{user.name}</div>
               <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>{user.email}</div>
             </div>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(45deg, #0070f3, #ff0080)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
+            <div 
+              onClick={() => setShowMenu(!showMenu)}
+              style={{ 
+                width: '40px', 
+                height: '40px', 
+                borderRadius: '50%', 
+                background: 'linear-gradient(45deg, #0070f3, #ff0080)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontWeight: 800,
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease',
+                transform: showMenu ? 'scale(1.1)' : 'scale(1)'
+              }}>
               {user.name?.[0]}
             </div>
+
+            {/* Dropdown Menu */}
+            {showMenu && (
+              <div style={{
+                position: 'absolute',
+                top: '120%',
+                right: 0,
+                background: '#111',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                padding: '0.5rem',
+                minWidth: '160px',
+                zIndex: 100,
+                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+              }}>
+                <a href="/" style={{
+                  display: 'block',
+                  padding: '0.75rem 1rem',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }} className="menu-item">
+                  🏠 Home Page
+                </a>
+                <button 
+                  onClick={handleLogout}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '0.75rem 1rem',
+                    color: '#ff0080',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '0.9rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                  }} className="menu-item">
+                  🚪 Log Out
+                </button>
+              </div>
+            )}
           </div>
         </header>
 

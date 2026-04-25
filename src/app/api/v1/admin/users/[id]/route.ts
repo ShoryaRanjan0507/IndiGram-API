@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSession();
@@ -14,7 +14,7 @@ export async function PATCH(
     }
 
     const { plan, role } = await request.json();
-    const userId = params.id;
+    const { id: userId } = await params;
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },

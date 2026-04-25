@@ -147,7 +147,7 @@ export default function DashboardPage() {
                   background: 'transparent'
                 }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
-                  <span style={{ fontSize: '1.1rem' }}>🏠</span> Home Page
+                  Home Page
                 </a>
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0.4rem 0' }}></div>
                 <button 
@@ -168,7 +168,7 @@ export default function DashboardPage() {
                     transition: 'background 0.2s'
                   }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,77,77,0.1)'}
                      onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
-                  <span style={{ fontSize: '1.1rem' }}>🚪</span> Log Out
+                  Log Out
                 </button>
               </div>
             )}

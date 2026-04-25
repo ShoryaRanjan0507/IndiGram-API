@@ -1,10 +1,19 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SUBSCRIPTION_PLANS, Plan } from '../config/plans';
 
 export default function LandingPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
+    fetch('/api/v1/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) setIsLoggedIn(true);
+      })
+      .catch(() => {});
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -32,8 +41,14 @@ export default function LandingPage() {
         <span style={{ fontWeight: '800', letterSpacing: '-0.02em', fontSize: '1.2rem' }}>IndiGram</span>
         <a href="#features" className="nav-link">Features</a>
         <a href="#plans" className="nav-link">Plans</a>
-        <a href="/login" className="nav-link" style={{ fontWeight: 600 }}>Sign In</a>
-        <a href="/signup" className="btn-buy">Sign Up</a>
+        {isLoggedIn ? (
+          <a href="/dashboard" className="btn-buy">Dashboard</a>
+        ) : (
+          <>
+            <a href="/login" className="nav-link" style={{ fontWeight: 600 }}>Sign In</a>
+            <a href="/signup" className="btn-buy">Sign Up</a>
+          </>
+        )}
       </nav>
 
       {/* Hero Section */}

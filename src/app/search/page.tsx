@@ -58,9 +58,14 @@ export default function SearchPage() {
     <main style={{ minHeight: '100vh', padding: '4rem 2rem' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <a href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
-            &larr; Back to Home
-          </a>
+          <div style={{ display: 'flex', gap: '1.5rem' }}>
+            <a href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+              &larr; Back to Home
+            </a>
+            <a href="/dashboard" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 600 }}>
+              Dashboard
+            </a>
+          </div>
           {process.env.NODE_ENV === 'development' && (
             <button 
               onClick={() => setIsDev(!isDev)}

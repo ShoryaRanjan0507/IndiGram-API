@@ -35,3 +35,4 @@ data.csv
 prisma/dev.db
 *.csv
 *.xlsx
+.env

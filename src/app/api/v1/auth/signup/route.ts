@@ -23,7 +23,17 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
-      data: { email, name, phone, password: hashedPassword },
+      data: { 
+        email, 
+        name, 
+        phone, 
+        password: hashedPassword,
+        apiKeys: {
+          create: {
+            key: `ig_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+          }
+        }
+      },
     });
 
     const session = await encrypt({ id: user.id, email: user.email, name: user.name, role: user.role, plan: user.plan });

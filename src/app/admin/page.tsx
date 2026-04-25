@@ -16,12 +16,21 @@ interface User {
   apiKeys: ApiKey[];
 }
 
+interface Stats {
+  totalUsers: number;
+  totalRequests: number;
+  estimatedRevenue: number;
+}
+
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [updating, setUpdating] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchData = () => {
     fetch('/api/v1/admin/users')
       .then(res => {
         if (!res.ok) throw new Error('Unauthorized');
@@ -29,92 +38,193 @@ export default function AdminPage() {
       })
       .then(data => {
         setUsers(data.users || []);
+        setStats(data.stats || null);
         setLoading(false);
       })
       .catch(err => {
         setError(err.message);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
+
+  const handleUpdatePlan = async (userId: string, newPlan: string) => {
+    setUpdating(userId);
+    try {
+      const res = await fetch(`/api/v1/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: newPlan }),
+      });
+      if (res.ok) {
+        fetchData(); // Refresh data
+      }
+    } catch (err) {
+      console.error('Update failed:', err);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const filteredUsers = users.filter(u => 
+    u.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', color: '#fff' }}>
-        <div>Loading Admin Panel...</div>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505', color: '#fff' }}>
+        <div className="loader">Loading Admin Console...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', color: '#fff' }}>
-        <div style={{ textAlign: 'center' }}>
-          <h1 style={{ color: '#ff0080' }}>Access Denied</h1>
-          <p>You do not have administrative privileges.</p>
-          <a href="/dashboard" style={{ color: '#0070f3' }}>Back to Dashboard</a>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505', color: '#fff' }}>
+        <div style={{ textAlign: 'center', padding: '2rem', background: 'rgba(255,0,0,0.05)', borderRadius: '24px', border: '1px solid rgba(255,0,0,0.1)' }}>
+          <h1 style={{ color: '#ff0080', fontSize: '2.5rem', marginBottom: '1rem' }}>Access Denied</h1>
+          <p style={{ opacity: 0.6, marginBottom: '2rem' }}>You do not have administrative privileges to access this area.</p>
+          <a href="/dashboard" style={{ color: '#fff', background: '#0070f3', padding: '0.8rem 2rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 600 }}>Return to Dashboard</a>
         </div>
       </div>
     );
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#fafafa', color: '#111', padding: '3rem' }}>
+    <main style={{ minHeight: '100vh', background: '#050505', color: '#fff', padding: '3rem' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+        
+        {/* Header */}
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
           <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Admin Overview</h1>
-            <p style={{ color: '#666' }}>Manage all IndiGram API users and keys</p>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>Platform Admin</h1>
+            <p style={{ opacity: 0.5, marginTop: '0.5rem' }}>IndiGram Global Management & Analytics</p>
           </div>
-          <a href="/dashboard" style={{ textDecoration: 'none', color: '#0070f3', fontWeight: 600 }}>← Back to Dashboard</a>
+          <a href="/dashboard" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 600, padding: '0.6rem 1.2rem', borderRadius: '12px', border: '1px solid rgba(0,112,243,0.3)' }}>
+            &larr; Dashboard
+          </a>
         </header>
 
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #eee', overflow: 'hidden', boxShadow: '0 4px 30px rgba(0,0,0,0.03)' }}>
+        {/* Stats Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginBottom: '4rem' }}>
+          {[
+            { label: 'Total Users', value: stats?.totalUsers || 0, icon: '👥', color: '#0070f3' },
+            { label: 'API Requests', value: stats?.totalRequests.toLocaleString() || 0, icon: '⚡', color: '#ff0080' },
+            { label: 'Est. Revenue', value: `$${stats?.estimatedRevenue || 0}`, icon: '💰', color: '#00ff80' }
+          ].map((stat, i) => (
+            <div key={i} style={{ 
+              background: 'rgba(255,255,255,0.02)', 
+              padding: '2rem', 
+              borderRadius: '24px', 
+              border: '1px solid rgba(255,255,255,0.05)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{stat.icon}</div>
+              <div style={{ opacity: 0.5, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>{stat.label}</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 800, color: stat.color }}>{stat.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Users Management */}
+        <div style={{ 
+          background: 'rgba(255,255,255,0.02)', 
+          borderRadius: '24px', 
+          border: '1px solid rgba(255,255,255,0.05)',
+          overflow: 'hidden'
+        }}>
+          <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Registered Users</h2>
+            <input 
+              type="text" 
+              placeholder="Search by name or email..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '12px',
+                color: '#fff',
+                width: '300px',
+                outline: 'none'
+              }}
+            />
+          </div>
+
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #eee' }}>
-                <th style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 700, color: '#666' }}>USER</th>
-                <th style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 700, color: '#666' }}>PLAN</th>
-                <th style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 700, color: '#666' }}>API KEY</th>
-                <th style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 700, color: '#666' }}>USAGE</th>
-                <th style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 700, color: '#666' }}>ROLE</th>
+              <tr style={{ background: 'rgba(255,255,255,0.01)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <th style={{ padding: '1.25rem', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>User Details</th>
+                <th style={{ padding: '1.25rem', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Plan</th>
+                <th style={{ padding: '1.25rem', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>API Key / Usage</th>
+                <th style={{ padding: '1.25rem', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
-                <tr key={user.id} style={{ borderBottom: '1px solid #eee' }}>
+              {filteredUsers.map(user => (
+                <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                   <td style={{ padding: '1.25rem' }}>
                     <div style={{ fontWeight: 600 }}>{user.name}</div>
-                    <div style={{ fontSize: '0.85rem', color: '#888' }}>{user.email}</div>
+                    <div style={{ fontSize: '0.85rem', opacity: 0.4 }}>{user.email}</div>
                   </td>
                   <td style={{ padding: '1.25rem' }}>
                     <span style={{ 
-                      fontSize: '0.75rem', 
-                      fontWeight: 700, 
-                      padding: '0.25rem 0.6rem', 
-                      borderRadius: '12px', 
-                      background: user.plan === 'FREE' ? '#eee' : '#e8f5e9',
-                      color: user.plan === 'FREE' ? '#666' : '#2e7d32'
+                      fontSize: '0.7rem', 
+                      fontWeight: 800, 
+                      padding: '0.3rem 0.8rem', 
+                      borderRadius: '20px', 
+                      background: user.plan === 'FREE' ? 'rgba(255,255,255,0.05)' : 'rgba(0,255,128,0.1)',
+                      color: user.plan === 'FREE' ? '#888' : '#00ff80',
+                      border: `1px solid ${user.plan === 'FREE' ? 'rgba(255,255,255,0.1)' : 'rgba(0,255,128,0.2)'}`
                     }}>
                       {user.plan}
                     </span>
                   </td>
                   <td style={{ padding: '1.25rem' }}>
-                    <code style={{ fontSize: '0.85rem', color: '#0070f3', background: '#f0f7ff', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                    <code style={{ fontSize: '0.8rem', color: '#0070f3', display: 'block', marginBottom: '0.3rem' }}>
                       {user.apiKeys[0]?.key || 'None'}
                     </code>
-                  </td>
-                  <td style={{ padding: '1.25rem', fontWeight: 600 }}>
-                    {user.apiKeys[0]?.usage || 0}
-                  </td>
-                  <td style={{ padding: '1.25rem' }}>
-                    <span style={{ opacity: user.role === 'ADMIN' ? 1 : 0.3, fontWeight: user.role === 'ADMIN' ? 700 : 400 }}>
-                      {user.role}
+                    <span style={{ fontSize: '0.75rem', opacity: 0.4 }}>
+                      Used: <strong>{user.apiKeys[0]?.usage || 0}</strong> requests
                     </span>
+                  </td>
+                  <td style={{ padding: '1.25rem', textAlign: 'right' }}>
+                    <select 
+                      value={user.plan}
+                      disabled={updating === user.id}
+                      onChange={(e) => handleUpdatePlan(user.id, e.target.value)}
+                      style={{
+                        background: '#111',
+                        color: '#fff',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        padding: '0.4rem 0.8rem',
+                        borderRadius: '8px',
+                        fontSize: '0.85rem',
+                        outline: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value="FREE">FREE</option>
+                      <option value="PREMIUM">PREMIUM</option>
+                      <option value="PRO">PRO</option>
+                      <option value="UNLIMITED">UNLIMITED</option>
+                    </select>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          
+          {filteredUsers.length === 0 && (
+            <div style={{ padding: '4rem', textAlign: 'center', opacity: 0.4 }}>
+              No users found matching your search.
+            </div>
+          )}
         </div>
       </div>
     </main>
